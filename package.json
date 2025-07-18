@@ -1,0 +1,61 @@
+{
+  "name": "@octoreport/cli",
+  "version": "0.1.0",
+  "description": "A modern, secure, and timezone-aware GitHub PR/issue analytics reporting tool.",
+  "type": "module",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "github",
+    "report",
+    "pr",
+    "activity",
+    "pr-analysis",
+    "typescript"
+  ],
+  "author": "nvrtmd",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/octoreport/cli.git"
+  },
+  "bugs": {
+    "url": "https://github.com/octoreport/cli/issues"
+  },
+  "homepage": "https://github.com/octoreport/cli#readme",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --target es2022 --format esm,cjs",
+    "test": "vitest run",
+    "dev:test": "vitest",
+    "prepublishOnly": "npm run build && npm run test",
+    "lint": "eslint . --ext .ts",
+    "lint:fix": "eslint . --ext .ts --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@types/luxon": "^3.6.2",
+    "@types/node": "^24.0.14",
+    "@typescript-eslint/eslint-plugin": "^8.37.0",
+    "@typescript-eslint/parser": "^8.37.0",
+    "eslint": "^9.31.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-unused-imports": "^4.1.4",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.2",
+    "prettier": "^3.6.2",
+    "tsup": "^8.5.0",
+    "typescript": "^5.8.3",
+    "vitest": "^3.2.4"
+  },
+  "dependencies": {
+    "@octokit/auth-oauth-device": "^8.0.1"
+  }
+}
