@@ -1,10 +1,9 @@
 #!/usr/bin/env node
-import { createTableCommand, createTotalCommand } from './commands';
-import { createCommander } from './setup';
+import { registerAllCommand } from './commands';
+import { createCommander } from './config';
 
 const program = createCommander();
 
-createTotalCommand(program);
-createTableCommand(program);
+registerAllCommand(program);
 
-program.parse();
+program.parseAsync();

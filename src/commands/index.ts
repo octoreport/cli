@@ -1,3 +1,2 @@
-export * from './total';
-export * from './table';
-export * from './withCommonSetup';
+export * from './all';
+export * from './withCommandContext';

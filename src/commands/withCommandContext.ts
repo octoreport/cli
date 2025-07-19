@@ -1,10 +1,9 @@
 import ora, { Ora } from 'ora';
 
-import { login } from '../auth/login';
-import { getGithubToken } from '../auth/token';
-import { promptCommonQuestions } from '../prompts';
+import { login, getGithubToken } from '../features/auth';
+import { promptCommonQuestions } from '../features/prompts';
 
-export async function withCommonSetup<T>(
+export async function withCommandContext<T>(
   command: (
     answers: Awaited<ReturnType<typeof promptCommonQuestions>>,
     githubToken: string,
