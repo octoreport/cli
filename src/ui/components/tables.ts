@@ -2,26 +2,55 @@ import { PR } from '@octoreport/core';
 import Table from 'cli-table3';
 import type { Table as TableType } from 'cli-table3';
 
-export const COMMON_PR_COLUMNS: { width: number; title: string; key: keyof PR }[] = [
-  { width: 10, title: 'Number', key: 'number' },
-  { width: 30, title: 'Title', key: 'title' },
-  { width: 15, title: 'Author', key: 'author' },
-  { width: 10, title: 'Target Branch', key: 'targetBranch' },
-  { width: 50, title: 'Url', key: 'url' },
-  { width: 10, title: 'State', key: 'state' },
-];
+export interface TableConfig {
+  width: number;
+  title: string;
+  key: keyof PR;
+}
 
-export function createPRTable(columns: string[], widths: number[]) {
+export type TablePRData = Omit<PR, 'labels' | 'reviewers' | 'comments'>;
+
+export interface TableData {
+  data: PR[];
+  additionalColumns: (pr: PR) => PR[keyof PR][];
+  count: number;
+}
+
+export function createTable(columnList: string[], columnWidthList: number[]) {
   return new Table({
-    head: [...COMMON_PR_COLUMNS.map((column) => column.title), ...columns],
+    head: columnList,
     wordWrap: true,
-    colWidths: [...COMMON_PR_COLUMNS.map((column) => column.width), ...widths],
+    colWidths: columnWidthList,
   });
 }
 
 export function addTotalRow(table: TableType, count: number, totalColSpan: number) {
   table.push([
     { content: 'Total', hAlign: 'left', colSpan: 1 },
-    { content: count, hAlign: 'left', colSpan: totalColSpan },
+    { content: count, hAlign: 'left', colSpan: totalColSpan - 1 },
   ]);
+}
+
+export function renderTable(tableConfig: TableConfig[], prList: PR[], isAddTotalRow = true) {
+  const table = createTable(
+    tableConfig.map((column) => column.title),
+    tableConfig.map((column) => column.width),
+  );
+  const rowList = prList.map((pr) => [
+    ...tableConfig.map((column) => {
+      const value = pr[column.key];
+      if (Array.isArray(value)) {
+        return value.map((item) => item).join(', ');
+      } else {
+        return value;
+      }
+    }),
+  ]);
+  table.push(...rowList);
+
+  if (isAddTotalRow) {
+    addTotalRow(table, prList.length, tableConfig.length);
+  }
+
+  console.log(table.toString());
 }

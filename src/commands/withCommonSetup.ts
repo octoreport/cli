@@ -1,7 +1,6 @@
 import ora, { Ora } from 'ora';
 
-import { login } from '../auth/login';
-import { getGithubToken } from '../auth/token';
+import { login, getGithubToken } from '../auth';
 import { promptCommonQuestions } from '../prompts';
 
 export async function withCommonSetup<T>(
