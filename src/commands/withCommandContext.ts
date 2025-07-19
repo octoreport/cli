@@ -1,7 +1,7 @@
 import ora, { Ora } from 'ora';
 
-import { login, getGithubToken } from '../auth';
-import { promptCommonQuestions } from '../prompts';
+import { login, getGithubToken } from '../features/auth';
+import { promptCommonQuestions } from '../features/prompts';
 
 export async function withCommandContext<T>(
   command: (
