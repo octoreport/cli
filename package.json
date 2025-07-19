@@ -29,7 +29,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsup src/index.ts --target es2022 --format esm,cjs",
+    "build": "tsup src/index.ts --target es2022 --format esm",
     "test": "vitest run",
     "dev:test": "vitest",
     "prepublishOnly": "npm run build && npm run test",
@@ -38,6 +38,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "prepare": "husky"
+  },
+  "bin": {
+    "octoreport": "./dist/index.js"
   },
   "devDependencies": {
     "@types/luxon": "^3.6.2",
@@ -56,6 +59,14 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
-    "@octokit/auth-oauth-device": "^8.0.1"
+    "@octokit/auth-oauth-device": "^8.0.1",
+    "@octoreport/core": "^0.1.1",
+    "boxen": "^8.0.1",
+    "chalk": "^5.4.1",
+    "cli-table3": "^0.6.5",
+    "commander": "^14.0.0",
+    "inquirer": "^12.7.0",
+    "keytar": "^7.9.0",
+    "ora": "^8.2.0"
   }
 }
