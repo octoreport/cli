@@ -3,7 +3,7 @@ import ora, { Ora } from 'ora';
 import { login, getGithubToken } from '../auth';
 import { promptCommonQuestions } from '../prompts';
 
-export async function withCommonSetup<T>(
+export async function withCommandContext<T>(
   command: (
     answers: Awaited<ReturnType<typeof promptCommonQuestions>>,
     githubToken: string,

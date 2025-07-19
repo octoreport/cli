@@ -1,2 +1,2 @@
 export * from './all';
-export * from './withCommonSetup';
+export * from './withCommandContext';

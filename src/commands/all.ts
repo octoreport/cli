@@ -5,7 +5,7 @@ import { Command } from 'commander';
 import { printBox } from '../ui/components/boxes';
 import { TableConfig, renderTable } from '../ui/components/tables';
 
-import { withCommonSetup } from './withCommonSetup';
+import { withCommandContext } from './withCommandContext';
 
 export const COMMON_TABLE_CONFIG: TableConfig[] = [
   { width: 10, title: 'Number', key: 'number' },
@@ -34,7 +34,7 @@ export function registerAllCommand(program: Command) {
     .option('--format <format>', 'Output format (table, json)', 'table')
     .description('Get comprehensive PR activity table and json')
     .action(async ({ format }) => {
-      await withCommonSetup(async (answers, githubToken, username, spinner) => {
+      await withCommandContext(async (answers, githubToken, username, spinner) => {
         const {
           username: answeredUsername,
           repository,
