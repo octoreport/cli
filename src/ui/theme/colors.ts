@@ -9,6 +9,11 @@ export const colorPalette = {
   warning: '#f9f871',
   error: '#a33f00',
   info: '#58b1d7',
+  black: '#000000',
+  white: '#ffffff',
+  lightGray: '#c0c0c0',
+  gray: '#808080',
+  darkGray: '#404040',
 } as const;
 
 export const colors = {
@@ -20,6 +25,11 @@ export const colors = {
   warning: chalk.hex(colorPalette.warning),
   error: chalk.hex(colorPalette.error),
   info: chalk.hex(colorPalette.info),
+  black: chalk.hex(colorPalette.black),
+  white: chalk.hex(colorPalette.white),
+  lightGray: chalk.hex(colorPalette.lightGray),
+  gray: chalk.hex(colorPalette.gray),
+  darkGray: chalk.hex(colorPalette.darkGray),
 } as const;
 
 export const statusColors = {

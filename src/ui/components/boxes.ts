@@ -1,14 +1,16 @@
 import boxen from 'boxen';
 
-export function createBox(title: string, content: string) {
-  return boxen(content, {
+import { colorPalette } from '../theme';
+
+export function printBox(title: string, content: string) {
+  const box = boxen(content, {
     title,
     borderStyle: 'round',
-    borderColor: '#000000',
-    fullscreen: (width, height) => [width, height],
+    borderColor: colorPalette.primary,
     padding: 1,
     margin: 1,
     titleAlignment: 'center',
-    backgroundColor: '#000000',
   });
+
+  console.log(box);
 }
