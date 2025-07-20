@@ -71,8 +71,10 @@ export async function handleAllCommand(format: Format) {
         userParticipatedPRTableConfig,
         result.userParticipatedPRList.map((pr) => ({
           ...pr,
-          reviewers: [pr.reviewers.includes(username) ? '✅' : '❌'],
-          comments: [pr.comments && pr.comments.includes(username) ? '✅' : '❌'],
+          reviewers: [pr.reviewers.includes(username || answeredUsername) ? '✅' : '❌'],
+          comments: [
+            pr.comments && pr.comments.includes(username || answeredUsername) ? '✅' : '❌',
+          ],
         })),
       );
     } else if (format === 'json') {

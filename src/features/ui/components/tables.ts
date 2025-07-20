@@ -40,7 +40,7 @@ export function renderTable(tableConfig: TableConfig[], prList: PR[], isAddTotal
     ...tableConfig.map((column) => {
       const value = pr[column.key];
       if (Array.isArray(value)) {
-        return value.map((item) => item).join(', ');
+        return value.join(', ');
       } else {
         return value;
       }
