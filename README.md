@@ -3,7 +3,7 @@
 <h1 align="center">
 	<br>
 	<br>
-	<img width="320" src="media/logo.svg" alt="Chalk">
+	<img width="320" src="media/logo.png" alt="octoreport">
 	<br>
 	<br>
 	<br>
