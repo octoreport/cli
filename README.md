@@ -1,6 +1,13 @@
 # @octoreport/cli
 
-![](https://ibb.co/359GnvLP)
+<h1 align="center">
+	<br>
+	<br>
+	<img width="320" src="media/logo.svg" alt="Chalk">
+	<br>
+	<br>
+	<br>
+</h1>
 
 > A modern, secure, and timezone-aware GitHub PR/issue analytics CLI tool.It provides a clean, interactive command-line interface for retrieving, filtering, and analyzing pull request activity with flexible filtering and accurate participation tracking.
 
