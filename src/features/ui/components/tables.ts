@@ -8,7 +8,7 @@ export interface TableConfig {
   key: keyof PR;
 }
 
-export type TablePRData = Omit<PR, 'labels' | 'reviewers' | 'comments'>;
+export type TablePRData = Omit<PR, 'labels' | 'reviewers' | 'commenters'>;
 
 export interface TableData {
   data: PR[];
