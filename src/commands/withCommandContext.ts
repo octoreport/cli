@@ -24,10 +24,18 @@ export async function withCommandContext<T>(
   try {
     await command(answers, githubToken, username, spinner);
   } catch (error) {
+    // 이미 처리된 오류인지 확인 (spinner가 이미 fail 상태인지)
+    if (!spinner.isSpinning && spinner.text.includes('❌')) {
+      // 이미 처리된 오류는 추가 처리하지 않음
+      return;
+    }
+
     const errorMessage = error instanceof Error && error.message ? error.message : 'Unknown error';
     spinner.fail(`❌ Failed to execute command: ${errorMessage}. Please try again.`);
     console.error(error);
   } finally {
-    spinner.stop();
+    if (spinner.isSpinning) {
+      spinner.stop();
+    }
   }
 }

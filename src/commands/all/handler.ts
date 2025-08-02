@@ -1,4 +1,4 @@
-import { getUserPRListByCreationAndParticipation } from '@octoreport/core';
+import { getUserPRActivityListInPeriod } from '@octoreport/core';
 import chalk from 'chalk';
 
 import { printBox, TableConfig, renderTable } from '../../features/ui';
@@ -29,7 +29,7 @@ export const COMMON_TABLE_CONFIG: TableConfig[] = [
 export async function handleAllCommand(format: Format) {
   await withCommandContext(async (answers, githubToken, username, spinner) => {
     const { username: answeredUsername, repository, startDate, endDate, targetBranch } = answers;
-    const result = await getUserPRListByCreationAndParticipation({
+    const result = await getUserPRActivityListInPeriod({
       githubToken,
       username: answeredUsername || username,
       repository,
@@ -60,28 +60,26 @@ export async function handleAllCommand(format: Format) {
         { width: 15, title: 'Created At', key: 'createdAt' },
         { width: 15, title: 'Merged At', key: 'mergedAt' },
       ];
-      renderTable(userCreatedPRTableConfig, result.userCreatedPRList);
+      renderTable(userCreatedPRTableConfig, result.created);
 
       const userParticipatedPRTableConfig: TableConfig[] = [
         ...COMMON_TABLE_CONFIG,
         { width: 15, title: 'Is Reviewed By Me', key: 'reviewers' },
-        { width: 15, title: 'Is Commented By Me', key: 'comments' },
+        { width: 15, title: 'Is Commented By Me', key: 'commenters' },
       ];
       renderTable(
         userParticipatedPRTableConfig,
-        result.userParticipatedPRList.map((pr) => ({
+        result.participated.map((pr) => ({
           ...pr,
-          reviewers: [pr.reviewers.includes(username || answeredUsername) ? '✅' : '❌'],
-          comments: [
-            pr.comments && pr.comments.includes(username || answeredUsername) ? '✅' : '❌',
-          ],
+          reviewers: [pr.reviewers?.includes(username || answeredUsername) ? '✅' : '❌'],
+          commenters: [pr.commenters?.includes(username || answeredUsername) ? '✅' : '❌'],
         })),
       );
     } else if (format === 'json') {
       console.log(JSON.stringify(result, null, 2));
     } else {
-      console.log('\n🐙📊 User Created PRs:\n', result.userCreatedPRList);
-      console.log('\n🐙📊 User Participated PRs:\n', result.userParticipatedPRList);
+      console.log('\n🐙📊 User Created PRs:\n', result.created);
+      console.log('\n🐙📊 User Participated PRs:\n', result.participated);
     }
   });
 }
