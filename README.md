@@ -1,12 +1,7 @@
 # @octoreport/cli
 
 <h1 align="center">
-	<br>
-	<br>
-	<img width="320" src="media/logo.png" alt="octoreport">
-	<br>
-	<br>
-	<br>
+	<img width="500px" src="media/logo.png" alt="octoreport">
 </h1>
 
 > A modern, secure, and timezone-aware GitHub PR/issue analytics CLI tool.It provides a clean, interactive command-line interface for retrieving, filtering, and analyzing pull request activity with flexible filtering and accurate participation tracking.
@@ -126,7 +121,7 @@ Displays data in beautifully formatted ASCII tables:
 ├────────┼────────────────────┼────────────┼────────────┼─────────────────────────────────────────────┼────────┼──────────────┼──────────────┤
 │ 123    │ Add new feature    │ octocat    │ main       │ https://github.com/.../pull/123             │ MERGED │ 2025-01-15   │ 2025-01-16   │
 └────────┴────────────────────┴────────────┴────────────┴─────────────────────────────────────────────┴────────┴──────────────┴──────────────┘
-```
+````
 
 ### JSON Format
 
