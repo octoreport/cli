@@ -59,6 +59,7 @@
     "vitest": "^3.2.4"
   },
   "dependencies": {
+    "@napi-rs/keyring": "^1.1.9",
     "@octokit/auth-oauth-device": "^8.0.1",
     "@octoreport/core": "^0.1.1",
     "boxen": "^8.0.1",
@@ -66,7 +67,9 @@
     "cli-table3": "^0.6.5",
     "commander": "^14.0.0",
     "inquirer": "^12.7.0",
-    "keytar": "^7.9.0",
     "ora": "^8.2.0"
+  },
+  "optionalDependencies": {
+    "keytar": "^7.9.0"
   }
 }
