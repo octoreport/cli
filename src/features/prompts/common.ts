@@ -35,44 +35,12 @@ export async function promptCommonQuestions(isPrivateAccess: boolean = false) {
   ]);
 }
 
-export async function promptPermissionConfirmation(isPrivateAccess: boolean = false) {
-  console.log('🐙 What this tool actually does:');
-  console.log('  ✅ Reads PR activity data from repositories');
-  console.log('  ✅ Generates reports and analytics');
-  console.log('  ❌ Does NOT create, modify, or delete any repository content');
-  console.log('  ❌ Does NOT make any changes to your repositories');
-  console.log('  🔑 Token is securely stored in your OS keychain\n');
-
-  if (isPrivateAccess) {
-    console.log('\n🔒 Private Repository Access Request');
-    console.log('This will grant the following permissions:');
-    console.log('  • Full access to public and private repositories (read/write)');
-    console.log('  • Access to repository settings, webhooks, and deploy keys');
-    console.log('  • Ability to manage issues, pull requests, and wikis');
-    console.log('  • Access to organization resources and team memberships');
-    console.log('  • Ability to manage user and organization projects');
-    console.log('');
-    console.log('⚠️  Security Notice: This grants extensive permissions to ALL your repositories.');
-    console.log('   Only proceed if you trust this application and understand the implications.\n');
-  } else {
-    console.log('\n🔓 Public Repository Access Request');
-    console.log('This will grant the following permissions:');
-    console.log('  • Full access to public repositories (read/write)');
-    console.log('  • Access to public repository settings and webhooks');
-    console.log('  • Ability to manage public repository content');
-    console.log('  • Read access to your profile information');
-    console.log('');
-    console.log('⚠️  Security Notice: This grants read/write access to your public repositories.');
-    console.log('   This is more than read-only access.\n');
-  }
-
+export async function promptPrivateRepositoryAccessPermissionQuestion() {
   const { confirm } = await inquirer.prompt([
     {
       type: 'confirm',
       name: 'confirm',
-      message: isPrivateAccess
-        ? 'Do you want to proceed with private repository access? (y/N)'
-        : 'Do you want to proceed with public repository access? (y/N)',
+      message: 'Do you want to proceed with private repository access?',
       default: false,
     },
   ]);

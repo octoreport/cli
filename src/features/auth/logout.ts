@@ -1,4 +1,4 @@
-import { getGithubToken, deleteGithubToken, revokeGitHubToken } from './token';
+import { getGithubToken, deleteGithubToken, invalidateGitHubToken } from './token';
 import { getUserInfo, clearUserInfo } from './userInfo';
 
 export async function logout() {
@@ -7,17 +7,19 @@ export async function logout() {
     if (email) {
       const currentToken = await getGithubToken(email);
       if (currentToken) {
-        await revokeGitHubToken(currentToken);
+        await invalidateGitHubToken(currentToken);
         await deleteGithubToken(email);
         clearUserInfo();
-        console.log('🗑️ All stored tokens have been cleared.');
+        console.log('✅ Logout completed successfully!');
       } else {
-        console.log('🗑️ No stored tokens found. Please log in first.');
+        console.log('ℹ️ No stored tokens found. Local data cleared.');
       }
+    } else {
+      console.log('ℹ️ No user information found. Nothing to clear.');
     }
   } catch (error) {
     console.log(
-      '⚠️ Failed to clear tokens:',
+      '⚠️ Failed to process logout:',
       error instanceof Error ? error.message : 'Unknown error',
     );
   }

@@ -81,15 +81,15 @@ export async function deleteGithubToken(email: string) {
   }
 }
 
-export async function revokeGitHubToken(accessToken: string): Promise<void> {
+export async function invalidateGitHubToken(accessToken: string): Promise<void> {
   try {
+    console.log('🔍 Attempting to invalidate GitHub access token...');
     const response = await fetch(
       `${GITHUB_CONFIG.BASE_URL}/applications/${GITHUB_CONFIG.CLIENT_ID}/grant`,
       {
         method: 'DELETE',
         headers: {
           Accept: 'application/vnd.github+json',
-          Authorization: `Bearer ${accessToken}`,
           'X-GitHub-Api-Version': GITHUB_CONFIG.API_VERSION,
           'Content-Type': 'application/json',
         },
@@ -101,19 +101,29 @@ export async function revokeGitHubToken(accessToken: string): Promise<void> {
 
     switch (response.status) {
       case 204:
-        console.log('✅ GitHub OAuth app authorization revoked successfully');
+        console.log('✅ GitHub access token invalidated successfully');
+        console.log('ℹ️ Note: The OAuth app may still appear in GitHub Applications');
+        console.log(
+          `ℹ️ To completely remove the app, visit: https://github.com/settings/connections/applications/${GITHUB_CONFIG.CLIENT_ID}`,
+        );
         break;
       case 404:
-        console.log('ℹ️ No active authorization found to revoke');
+        console.log('ℹ️ No active authorization found to invalidate');
         break;
       default:
-        console.log(`⚠️ Failed to revoke authorization: ${response.status} ${response.statusText}`);
+        console.log(`⚠️ Failed to invalidate token: ${response.status} ${response.statusText}`);
+        console.log(
+          `ℹ️ Please manually revoke at: https://github.com/settings/connections/applications/${GITHUB_CONFIG.CLIENT_ID}`,
+        );
         break;
     }
   } catch (error) {
     console.log(
-      '⚠️ Failed to revoke GitHub authorization:',
+      '⚠️ Failed to invalidate GitHub token:',
       error instanceof Error ? error.message : 'Unknown error',
+    );
+    console.log(
+      `ℹ️ Please manually revoke at: https://github.com/settings/connections/applications/${GITHUB_CONFIG.CLIENT_ID}`,
     );
   }
 }

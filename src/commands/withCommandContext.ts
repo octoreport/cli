@@ -1,7 +1,10 @@
 import ora, { Ora } from 'ora';
 
 import { login, getGithubToken } from '../features/auth';
-import { promptCommonQuestions, promptPermissionConfirmation } from '../features/prompts';
+import {
+  promptCommonQuestions,
+  promptPrivateRepositoryAccessPermissionQuestion,
+} from '../features/prompts';
 
 export async function withCommandContext<T>(
   command: (
@@ -12,10 +15,12 @@ export async function withCommandContext<T>(
   ) => Promise<T>,
   isPrivateAccess: boolean = false,
 ) {
-  const isPermitted = await promptPermissionConfirmation(isPrivateAccess);
-  if (!isPermitted) {
-    console.log('❌ Permission denied. Exiting...');
-    process.exit(0);
+  if (isPrivateAccess) {
+    const isPermitted = await promptPrivateRepositoryAccessPermissionQuestion();
+    if (!isPermitted) {
+      console.log('❌ Permission denied. Exiting...');
+      process.exit(0);
+    }
   }
 
   const { email, username } = await login(isPrivateAccess);
