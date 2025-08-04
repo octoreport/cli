@@ -1,10 +1,12 @@
 import { getUserPRActivityListInPeriod } from '@octoreport/core';
 import chalk from 'chalk';
+import { Command } from 'commander';
 
-import { printBox, TableConfig, renderTable } from '../../features/ui';
-import { withCommandContext } from '../withCommandContext';
+import { printBox, TableConfig, renderTable } from '../features/ui';
 
-export type Format = 'table' | 'json' | 'general';
+import { withCommandContext } from './withCommandContext';
+
+type Format = 'table' | 'json' | 'general';
 
 function getFormat(format: Format): Format {
   switch (format) {
@@ -17,7 +19,7 @@ function getFormat(format: Format): Format {
   }
 }
 
-export const COMMON_TABLE_CONFIG: TableConfig[] = [
+const COMMON_TABLE_CONFIG: TableConfig[] = [
   { width: 10, title: 'Number', key: 'number' },
   { width: 30, title: 'Title', key: 'title' },
   { width: 15, title: 'Author', key: 'author' },
@@ -26,7 +28,7 @@ export const COMMON_TABLE_CONFIG: TableConfig[] = [
   { width: 10, title: 'State', key: 'state' },
 ];
 
-export async function handleAllCommand(format: Format) {
+async function handleAllCommand(format: Format, isPrivateAccess: boolean = false) {
   await withCommandContext(async (answers, githubToken, username, spinner) => {
     const { username: answeredUsername, repository, startDate, endDate, targetBranch } = answers;
     const result = await getUserPRActivityListInPeriod({
@@ -52,7 +54,9 @@ export async function handleAllCommand(format: Format) {
         '\n' +
         `🎯 Target Branch: ${targetBranch || 'All branches'}` +
         '\n' +
-        `✨ Format: ${getFormat(format)}`,
+        `✨ Format: ${getFormat(format)}` +
+        '\n' +
+        `🔒 Private Access: ${isPrivateAccess ? 'Enabled' : 'Disabled'}`,
     );
     if (format === 'table') {
       const userCreatedPRTableConfig: TableConfig[] = [
@@ -81,5 +85,17 @@ export async function handleAllCommand(format: Format) {
       console.log('\n🐙📊 User Created PRs:\n', result.created);
       console.log('\n🐙📊 User Participated PRs:\n', result.participated);
     }
-  });
+  }, isPrivateAccess);
+}
+
+export function registerAllCommand(program: Command) {
+  program
+    .command('all')
+    .alias('a')
+    .option('--format <format>', 'Output format (table, json)', 'table')
+    .option('--private', 'Enable access to private repositories')
+    .description('Get comprehensive PR activity table and json')
+    .action(async ({ format, private: isPrivateAccess }) => {
+      handleAllCommand(format, isPrivateAccess);
+    });
 }

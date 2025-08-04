@@ -15,3 +15,13 @@ export function getUserInfo(): { username: string; email: string } {
   const { user } = JSON.parse(fs.readFileSync(tokenPath, 'utf-8'));
   return { username: user.username, email: user.email };
 }
+
+export function clearUserInfo(): void {
+  try {
+    if (fs.existsSync(tokenPath)) {
+      fs.unlinkSync(tokenPath);
+    }
+  } catch (error) {
+    console.error('Error clearing user info:', error);
+  }
+}
