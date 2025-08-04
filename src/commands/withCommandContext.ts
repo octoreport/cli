@@ -1,7 +1,7 @@
 import ora, { Ora } from 'ora';
 
 import { login, getGithubToken } from '../features/auth';
-import { promptCommonQuestions } from '../features/prompts';
+import { promptCommonQuestions, promptPermissionConfirmation } from '../features/prompts';
 
 export async function withCommandContext<T>(
   command: (
@@ -10,10 +10,18 @@ export async function withCommandContext<T>(
     username: string,
     spinner: Ora,
   ) => Promise<T>,
+  privateAccess: boolean = false,
 ) {
-  const { email, username } = await login();
+  // 권한 확인 프롬프트
+  const permissionConfirmed = await promptPermissionConfirmation(privateAccess);
+  if (!permissionConfirmed) {
+    console.log('❌ Permission denied. Exiting...');
+    process.exit(0);
+  }
+
+  const { email, username } = await login(privateAccess);
   const githubToken = await getGithubToken(email);
-  const answers = await promptCommonQuestions();
+  const answers = await promptCommonQuestions(privateAccess);
 
   const spinner = ora({
     text: '🐙🔎 Processing...',

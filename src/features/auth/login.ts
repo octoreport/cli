@@ -9,7 +9,7 @@ const GITHUB_CLIENT_ID = 'Ov23lia7pFpgs8ULT1DL';
 
 export async function loginWithGitHubDeviceFlow(
   clientId: string,
-  scopes: string[] = ['repo', 'read:user'],
+  scopes: string[] = ['public_repo', 'read:user'],
 ) {
   const auth = createOAuthDeviceAuth({
     clientType: 'oauth-app',
@@ -28,17 +28,35 @@ export async function loginWithGitHubDeviceFlow(
   return authentication.token;
 }
 
-export async function login() {
+export async function login(privateAccess: boolean = false) {
   const { email, username } = getUserInfo();
   const githubToken = email ? await getGithubToken(email) : null;
 
+  const scopes = privateAccess ? ['repo', 'read:user'] : ['public_repo', 'read:user'];
+
   if (!githubToken) {
-    const newGithubToken = await loginWithGitHubDeviceFlow(GITHUB_CLIENT_ID);
+    const newGithubToken = await loginWithGitHubDeviceFlow(GITHUB_CLIENT_ID, scopes);
     const { login: username, email } = await fetchGitHubUserInfo(newGithubToken);
     setUserInfo({ username, email });
     await setGithubToken(email, newGithubToken);
     console.log(
       '🎉 Successfully logged in! You can now use octoreport. Please run the command again.',
+    );
+
+    return { email, username };
+  }
+
+  // if there is an existing token but private access is required, re-login is needed
+  if (privateAccess) {
+    console.log(
+      '🔐 Private repository access requires re-authentication with expanded permissions.',
+    );
+    const newGithubToken = await loginWithGitHubDeviceFlow(GITHUB_CLIENT_ID, scopes);
+    const { login: username, email } = await fetchGitHubUserInfo(newGithubToken);
+    setUserInfo({ username, email });
+    await setGithubToken(email, newGithubToken);
+    console.log(
+      '🎉 Successfully logged in with private repository access! You can now use octoreport. Please run the command again.',
     );
 
     return { email, username };
