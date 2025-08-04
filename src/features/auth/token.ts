@@ -1,5 +1,7 @@
 import { Entry } from '@napi-rs/keyring';
 
+import { GITHUB_CONFIG } from '../../config/github';
+
 const SERVICE_NAME = '@octoreport/cli';
 
 async function loadKeytar() {
@@ -79,17 +81,38 @@ export async function deleteGithubToken(email: string) {
   }
 }
 
-export async function clearAllTokens() {
+export async function revokeGitHubToken(accessToken: string): Promise<void> {
   try {
-    const { getUserInfo } = await import('./userInfo');
-    const { email } = getUserInfo();
-    if (email) {
-      await deleteGithubToken(email);
-      console.log('🗑️ All stored tokens have been cleared.');
+    const response = await fetch(
+      `${GITHUB_CONFIG.BASE_URL}/applications/${GITHUB_CONFIG.CLIENT_ID}/grant`,
+      {
+        method: 'DELETE',
+        headers: {
+          Accept: 'application/vnd.github+json',
+          Authorization: `Bearer ${accessToken}`,
+          'X-GitHub-Api-Version': GITHUB_CONFIG.API_VERSION,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          access_token: accessToken,
+        }),
+      },
+    );
+
+    switch (response.status) {
+      case 204:
+        console.log('✅ GitHub OAuth app authorization revoked successfully');
+        break;
+      case 404:
+        console.log('ℹ️ No active authorization found to revoke');
+        break;
+      default:
+        console.log(`⚠️ Failed to revoke authorization: ${response.status} ${response.statusText}`);
+        break;
     }
   } catch (error) {
     console.log(
-      '⚠️ Failed to clear tokens:',
+      '⚠️ Failed to revoke GitHub authorization:',
       error instanceof Error ? error.message : 'Unknown error',
     );
   }

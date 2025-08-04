@@ -12,9 +12,8 @@ export async function withCommandContext<T>(
   ) => Promise<T>,
   isPrivateAccess: boolean = false,
 ) {
-  // 권한 확인 프롬프트
-  const permissionConfirmed = await promptPermissionConfirmation(isPrivateAccess);
-  if (!permissionConfirmed) {
+  const isPermitted = await promptPermissionConfirmation(isPrivateAccess);
+  if (!isPermitted) {
     console.log('❌ Permission denied. Exiting...');
     process.exit(0);
   }
@@ -32,9 +31,7 @@ export async function withCommandContext<T>(
   try {
     await command(answers, githubToken, username, spinner);
   } catch (error) {
-    // 이미 처리된 오류인지 확인 (spinner가 이미 fail 상태인지)
     if (!spinner.isSpinning && spinner.text.includes('❌')) {
-      // 이미 처리된 오류는 추가 처리하지 않음
       return;
     }
 
