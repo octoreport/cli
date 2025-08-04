@@ -28,7 +28,7 @@ const COMMON_TABLE_CONFIG: TableConfig[] = [
   { width: 10, title: 'State', key: 'state' },
 ];
 
-async function handleAllCommand(format: Format, privateAccess: boolean = false) {
+async function handleAllCommand(format: Format, isPrivateAccess: boolean = false) {
   await withCommandContext(async (answers, githubToken, username, spinner) => {
     const { username: answeredUsername, repository, startDate, endDate, targetBranch } = answers;
     const result = await getUserPRActivityListInPeriod({
@@ -56,7 +56,7 @@ async function handleAllCommand(format: Format, privateAccess: boolean = false) 
         '\n' +
         `✨ Format: ${getFormat(format)}` +
         '\n' +
-        `🔒 Private Access: ${privateAccess ? 'Enabled' : 'Disabled'}`,
+        `🔒 Private Access: ${isPrivateAccess ? 'Enabled' : 'Disabled'}`,
     );
     if (format === 'table') {
       const userCreatedPRTableConfig: TableConfig[] = [
@@ -85,7 +85,7 @@ async function handleAllCommand(format: Format, privateAccess: boolean = false) 
       console.log('\n🐙📊 User Created PRs:\n', result.created);
       console.log('\n🐙📊 User Participated PRs:\n', result.participated);
     }
-  }, privateAccess);
+  }, isPrivateAccess);
 }
 
 export function registerAllCommand(program: Command) {
@@ -95,7 +95,7 @@ export function registerAllCommand(program: Command) {
     .option('--format <format>', 'Output format (table, json)', 'table')
     .option('--private', 'Enable access to private repositories')
     .description('Get comprehensive PR activity table and json')
-    .action(async ({ format, private: privateAccess }) => {
-      handleAllCommand(format, privateAccess);
+    .action(async ({ format, private: isPrivateAccess }) => {
+      handleAllCommand(format, isPrivateAccess);
     });
 }

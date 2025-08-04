@@ -28,11 +28,11 @@ export async function loginWithGitHubDeviceFlow(
   return authentication.token;
 }
 
-export async function login(privateAccess: boolean = false) {
+export async function login(isPrivateAccess: boolean = false) {
   const { email, username } = getUserInfo();
   const githubToken = email ? await getGithubToken(email) : null;
 
-  const scopes = privateAccess ? ['repo', 'read:user'] : ['public_repo', 'read:user'];
+  const scopes = isPrivateAccess ? ['repo', 'read:user'] : ['public_repo', 'read:user'];
 
   if (!githubToken) {
     const newGithubToken = await loginWithGitHubDeviceFlow(GITHUB_CLIENT_ID, scopes);
@@ -47,7 +47,7 @@ export async function login(privateAccess: boolean = false) {
   }
 
   // if there is an existing token but private access is required, re-login is needed
-  if (privateAccess) {
+  if (isPrivateAccess) {
     console.log(
       '🔐 Private repository access requires re-authentication with expanded permissions.',
     );

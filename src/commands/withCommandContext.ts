@@ -10,18 +10,18 @@ export async function withCommandContext<T>(
     username: string,
     spinner: Ora,
   ) => Promise<T>,
-  privateAccess: boolean = false,
+  isPrivateAccess: boolean = false,
 ) {
   // 권한 확인 프롬프트
-  const permissionConfirmed = await promptPermissionConfirmation(privateAccess);
+  const permissionConfirmed = await promptPermissionConfirmation(isPrivateAccess);
   if (!permissionConfirmed) {
     console.log('❌ Permission denied. Exiting...');
     process.exit(0);
   }
 
-  const { email, username } = await login(privateAccess);
+  const { email, username } = await login(isPrivateAccess);
   const githubToken = await getGithubToken(email);
-  const answers = await promptCommonQuestions(privateAccess);
+  const answers = await promptCommonQuestions(isPrivateAccess);
 
   const spinner = ora({
     text: '🐙🔎 Processing...',
