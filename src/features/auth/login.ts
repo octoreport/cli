@@ -2,15 +2,10 @@ import { createOAuthDeviceAuth } from '@octokit/auth-oauth-device';
 import { fetchGitHubUserInfo } from '@octoreport/core';
 
 import { GITHUB_CONFIG, GITHUB_SCOPES } from '../../config/github';
-import {
-  logPrivateRepositoryAccessRequestInfo,
-  logToolAccessRangeInfo,
-  logPublicRepositoryAccessRequestInfo,
-} from '../ui/console/permission';
+import { logLoginInfo } from '../ui/console/permission';
 
 import { getGithubToken, setGithubToken } from './token';
-import { getUserInfo } from './userInfo';
-import { setUserInfo } from './userInfo';
+import { getUserInfo, setUserInfo } from './userInfo';
 
 async function authorizeWithGitHubDeviceFlow(
   clientId: string,
@@ -34,34 +29,37 @@ async function authorizeWithGitHubDeviceFlow(
 }
 
 export async function login(isPrivateAccess: boolean = false) {
-  const { email, username } = getUserInfo();
-  const githubToken = email ? await getGithubToken(email) : null;
+  logLoginInfo(isPrivateAccess);
 
-  if (!githubToken) {
-    logToolAccessRangeInfo();
-    if (isPrivateAccess) {
-      logPrivateRepositoryAccessRequestInfo();
-    } else {
-      logPublicRepositoryAccessRequestInfo();
-    }
+  const repoScopes = isPrivateAccess
+    ? [...GITHUB_SCOPES.PRIVATE_REPO]
+    : [...GITHUB_SCOPES.PUBLIC_REPO];
 
-    const repoScopes = isPrivateAccess
-      ? [...GITHUB_SCOPES.PRIVATE_REPO]
-      : [...GITHUB_SCOPES.PUBLIC_REPO];
-
-    const newGithubToken = await authorizeWithGitHubDeviceFlow(GITHUB_CONFIG.CLIENT_ID, [
-      ...repoScopes,
-      ...GITHUB_SCOPES.USER_INFO,
-    ]);
-    const { login: username, email } = await fetchGitHubUserInfo(newGithubToken);
-    setUserInfo({ username, email });
-    await setGithubToken(email, newGithubToken);
-    console.log(
-      `🎉 Successfully logged in${' with private repository access'}! You can now use @octoreport/cli. Please run the command again.`,
-    );
-
-    return { email, username };
-  }
+  const newGithubToken = await authorizeWithGitHubDeviceFlow(GITHUB_CONFIG.CLIENT_ID, [
+    ...repoScopes,
+    ...GITHUB_SCOPES.USER_INFO,
+  ]);
+  const { login: username, email } = await fetchGitHubUserInfo(newGithubToken);
+  setUserInfo({ username, email });
+  await setGithubToken(email, newGithubToken);
+  console.log(
+    `🎉 Successfully logged in${isPrivateAccess && ' with private repository access'}! You can now use @octoreport/cli. Please run the command again.`,
+  );
 
   return { email, username };
+}
+
+export async function isLoggedIn(): Promise<boolean> {
+  const { email } = getUserInfo();
+  const githubToken = email ? await getGithubToken(email) : null;
+  return !!githubToken;
+}
+
+export async function getLoggedInUserInfo(isPrivateAccess: boolean = false) {
+  if (!isLoggedIn()) {
+    return await login(isPrivateAccess);
+  } else {
+    const { email, username } = getUserInfo();
+    return { email, username };
+  }
 }

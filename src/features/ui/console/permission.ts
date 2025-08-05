@@ -31,3 +31,12 @@ export function logPublicRepositoryAccessRequestInfo() {
   console.log('⚠️  Security Notice: This grants read/write access to your public repositories.');
   console.log('   This is more than read-only access.\n');
 }
+
+export function logLoginInfo(isPrivateAccess: boolean = false) {
+  logToolAccessRangeInfo();
+  if (isPrivateAccess) {
+    logPrivateRepositoryAccessRequestInfo();
+  } else {
+    logPublicRepositoryAccessRequestInfo();
+  }
+}
