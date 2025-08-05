@@ -1,14 +1,11 @@
 import ora, { Ora } from 'ora';
 
 import { login, getGithubToken } from '../features/auth';
-import {
-  promptCommonQuestions,
-  promptPrivateRepositoryAccessPermissionQuestion,
-} from '../features/prompts';
+import { promptPRFetchCriteria, promptPrivateRepositoryAccessConfirm } from '../features/prompts';
 
 export async function withCommandContext<T>(
   command: (
-    answers: Awaited<ReturnType<typeof promptCommonQuestions>>,
+    answers: Awaited<ReturnType<typeof promptPRFetchCriteria>>,
     githubToken: string,
     username: string,
     spinner: Ora,
@@ -16,7 +13,7 @@ export async function withCommandContext<T>(
   isPrivateAccess: boolean = false,
 ) {
   if (isPrivateAccess) {
-    const isPermitted = await promptPrivateRepositoryAccessPermissionQuestion();
+    const isPermitted = await promptPrivateRepositoryAccessConfirm();
     if (!isPermitted) {
       console.log('❌ Permission denied. Exiting...');
       process.exit(0);
@@ -25,7 +22,7 @@ export async function withCommandContext<T>(
 
   const { email, username } = await login(isPrivateAccess);
   const githubToken = await getGithubToken(email);
-  const answers = await promptCommonQuestions(isPrivateAccess);
+  const answers = await promptPRFetchCriteria(isPrivateAccess);
 
   const spinner = ora({
     text: '🐙🔎 Processing...',
