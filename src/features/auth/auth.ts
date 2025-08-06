@@ -1,6 +1,7 @@
 import { fetchGitHubUserInfo } from '@octoreport/core';
 
 import { deleteCredentials, getCredentials } from '../storage';
+import { logLoginGuide } from '../ui';
 
 import { storeUserCredentials } from './credentials';
 import { issueGitHubTokenForRepoScope, invalidateGitHubToken } from './token';
@@ -9,6 +10,7 @@ import { clearUserInfo, getUserInfo } from './userInfo';
 export type RepoScope = 'public' | 'private';
 
 export async function login(repoScope: RepoScope): Promise<void> {
+  logLoginGuide(repoScope);
   const newToken = await issueGitHubTokenForRepoScope(repoScope);
   const { login: username, email } = await fetchGitHubUserInfo(newToken);
   await storeUserCredentials(newToken, repoScope, { email, username });
