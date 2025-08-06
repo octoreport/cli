@@ -61,7 +61,7 @@
   "dependencies": {
     "@napi-rs/keyring": "^1.1.9",
     "@octokit/auth-oauth-device": "^8.0.1",
-    "@octoreport/core": "^0.1.1",
+    "@octoreport/core": "^0.2.0",
     "boxen": "^8.0.1",
     "chalk": "^5.4.1",
     "cli-table3": "^0.6.5",
