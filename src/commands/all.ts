@@ -104,10 +104,35 @@ export function registerAllCommand(program: Command) {
   program
     .command('all')
     .alias('a')
+    .description(
+      'Generate comprehensive PR activity reports for GitHub repositories 🐙📊\n\n' +
+        'This command analyzes your Pull Request activities including:\n' +
+        'ℹ️ PRs you created\n' +
+        'ℹ️ PRs you participated in (reviews, comments)\n\n' +
+        'Output Format:\n' +
+        '• --format table: Default format. Display results in a table\n' +
+        '• --format json: Display results in JSON format\n' +
+        '• --format general: Display results in a more readable format\n\n' +
+        'Authentication Options:\n' +
+        '• --mode normal: Default mode. Use OAuth flow (tokens are securely stored)\n\n' +
+        '• --mode pat: Use Personal Access Token (requires manual input each time)\n' +
+        'Repository Access:\n' +
+        '• --repo-scope public: Default scope. Access public repositories only\n' +
+        '• --repo-scope private: Access both public and private repositories\n\n' +
+        'Example:\n' +
+        'octoreport all --mode pat --repo-scope private --format json',
+    )
     .option('--format <format>', 'Output format (table, json)', 'table')
-    .option('--mode <mode>', 'Mode (pat, normal)', 'normal')
-    .option('--repo-scope <repoScope>', 'Repository scope (public, private)', 'public')
-    .description('Get comprehensive PR activity table and json')
+    .option(
+      '--mode <mode>',
+      'Authentication mode: pat (Personal Access Token - requires manual token input each time, no storage) or normal (OAuth flow with token storage)',
+      'normal',
+    )
+    .option(
+      '--repo-scope <repoScope>',
+      'Repository access scope: public (public repositories only) or private (both public and private repositories)',
+      'public',
+    )
     .action(async ({ format, mode, repoScope }) => {
       handleAllCommand(format, { mode, repoScope });
     });
