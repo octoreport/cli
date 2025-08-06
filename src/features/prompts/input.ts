@@ -1,9 +1,12 @@
 import inquirer from 'inquirer';
 
-export async function promptCommonQuestions(isPrivateAccess: boolean = false) {
-  const repositoryMessage = isPrivateAccess
-    ? '🐙 Enter the repository (e.g., facebook/react) - Private repositories are now accessible:'
-    : '🐙 Enter the repository (e.g., facebook/react) - Only public repositories are accessible:';
+import { RepoScope } from '../auth';
+
+export async function promptPRFetchCriteria(repoScope: RepoScope) {
+  const repositoryMessage =
+    repoScope === 'private'
+      ? '🐙 Enter the repository (e.g., facebook/react) - Private repositories are now accessible:'
+      : '🐙 Enter the repository (e.g., facebook/react) - Only public repositories are accessible:';
 
   return await inquirer.prompt([
     {
@@ -33,17 +36,4 @@ export async function promptCommonQuestions(isPrivateAccess: boolean = false) {
       message: '🐙 Optionally, Enter target branch (press Enter to target all branches):',
     },
   ]);
-}
-
-export async function promptPrivateRepositoryAccessPermissionQuestion() {
-  const { confirm } = await inquirer.prompt([
-    {
-      type: 'confirm',
-      name: 'confirm',
-      message: 'Do you want to proceed with private repository access?',
-      default: false,
-    },
-  ]);
-
-  return confirm;
 }

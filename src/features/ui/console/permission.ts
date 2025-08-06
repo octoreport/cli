@@ -1,10 +1,13 @@
-export function logToolAccessRangeInfo() {
-  console.log('🐙 What this tool actually does:');
+import { RepoScope } from '../../auth';
+
+export function logAccessRangeInfo() {
+  console.log('🐙📊 What this tool actually does:');
   console.log('  ✅ Reads PR activity data from repositories');
   console.log('  ✅ Generates reports and analytics');
   console.log('  ❌ Does NOT create, modify, or delete any repository content');
   console.log('  ❌ Does NOT make any changes to your repositories');
-  console.log('  🔑 Token is securely stored in your OS keychain\n');
+  console.log('  🔑 Token is securely stored in your OS keychain');
+  console.log('  🙂 You can freely check the source code at https://github.com/octoreport/cli\n');
 }
 
 export function logPrivateRepositoryAccessRequestInfo() {
@@ -30,4 +33,18 @@ export function logPublicRepositoryAccessRequestInfo() {
   console.log('');
   console.log('⚠️  Security Notice: This grants read/write access to your public repositories.');
   console.log('   This is more than read-only access.\n');
+}
+
+export function logLoginGuide(repoScope: RepoScope) {
+  logAccessRangeInfo();
+  switch (repoScope) {
+    case 'private':
+      logPrivateRepositoryAccessRequestInfo();
+      break;
+    case 'public':
+      logPublicRepositoryAccessRequestInfo();
+      break;
+    default:
+      break;
+  }
 }

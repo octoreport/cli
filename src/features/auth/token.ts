@@ -1,84 +1,38 @@
-import { Entry } from '@napi-rs/keyring';
+import { createOAuthDeviceAuth } from '@octokit/auth-oauth-device';
 
-import { GITHUB_CONFIG } from '../../config/github';
+import { GITHUB_CONFIG, GITHUB_SCOPES } from '../../config/github';
 
-const SERVICE_NAME = '@octoreport/cli';
+import { RepoScope } from './auth';
 
-async function loadKeytar() {
-  try {
-    const keytarModule = await import('keytar');
-    const keytar = keytarModule.default || keytarModule;
+async function authorizeWithGitHubDeviceFlow(
+  clientId: string,
+  scopes: string[] = [...GITHUB_SCOPES.PUBLIC_REPO, ...GITHUB_SCOPES.USER_INFO],
+) {
+  const auth = createOAuthDeviceAuth({
+    clientType: 'oauth-app',
+    clientId,
+    scopes,
+    onVerification: (verification) => {
+      console.log('🔐 GitHub authentication is required!');
+      console.log(
+        `👉 Please visit the following link in your browser: ${verification.verification_uri}`,
+      );
+      console.log(`✅ Enter the following code in the browser: ${verification.user_code}`);
+    },
+  });
 
-    if (
-      keytar &&
-      typeof keytar.getPassword === 'function' &&
-      typeof keytar.deletePassword === 'function'
-    ) {
-      return keytar;
-    }
-  } catch {
-    // keytar is not installed
-  }
-  return null;
+  const authentication = await auth({ type: 'oauth' });
+  return authentication.token;
 }
 
-export async function getGithubToken(email: string): Promise<string> {
-  if (!email) throw new Error('GitHub email not found. Please log in first.');
-
-  const entry = new Entry(SERVICE_NAME, email);
-  let token = entry.getPassword() ?? '';
-
-  // keytar to keyring migration
-  if (!token) {
-    try {
-      const keytar = await loadKeytar();
-      if (keytar) {
-        const oldTokenStoredInKeytar = await keytar.getPassword(SERVICE_NAME, email);
-        if (oldTokenStoredInKeytar) {
-          entry.setPassword(oldTokenStoredInKeytar);
-          await keytar.deletePassword(SERVICE_NAME, email);
-          console.log('🔄 Token successfully migrated from keytar to keyring');
-          token = oldTokenStoredInKeytar;
-        }
-      }
-    } catch {
-      // migration failed silently (new auth flow)
-    }
-  }
-
-  return token;
-}
-
-export async function setGithubToken(email: string, token: string) {
-  if (!email) throw new Error('GitHub email not found. Please log in first.');
-
-  const entry = new Entry(SERVICE_NAME, email);
-  entry.setPassword(token);
-
-  // delete old token stored in keytar
-  try {
-    const keytar = await loadKeytar();
-    if (keytar) {
-      await keytar.deletePassword(SERVICE_NAME, email);
-    }
-  } catch {
-    // keytar deletion failed silently (already migrated to keyring)
-  }
-}
-
-export async function deleteGithubToken(email: string) {
-  const entry = new Entry(SERVICE_NAME, email);
-  entry.deletePassword();
-
-  // delete old token stored in keytar
-  try {
-    const keytar = await loadKeytar();
-    if (keytar) {
-      await keytar.deletePassword(SERVICE_NAME, email);
-    }
-  } catch {
-    // keytar deletion failed silently (already migrated to keyring)
-  }
+export async function issueGitHubTokenForRepoScope(repoScope: RepoScope): Promise<string> {
+  const formattedRepoScope =
+    repoScope === 'private' ? [...GITHUB_SCOPES.PRIVATE_REPO] : [...GITHUB_SCOPES.PUBLIC_REPO];
+  const newGithubToken = await authorizeWithGitHubDeviceFlow(GITHUB_CONFIG.CLIENT_ID, [
+    ...formattedRepoScope,
+    ...GITHUB_SCOPES.USER_INFO,
+  ]);
+  return newGithubToken;
 }
 
 export async function invalidateGitHubToken(accessToken: string): Promise<void> {
@@ -107,9 +61,13 @@ export async function invalidateGitHubToken(accessToken: string): Promise<void> 
           `ℹ️ To completely remove the app, visit: https://github.com/settings/connections/applications/${GITHUB_CONFIG.CLIENT_ID}`,
         );
         break;
-      case 404:
-        console.log('ℹ️ No active authorization found to invalidate');
+      case 422:
+        console.log('⚠️ Validation failed (token may be invalid or endpoint spammed)');
+        console.log(
+          `ℹ️ Please manually revoke at: https://github.com/settings/connections/applications/${GITHUB_CONFIG.CLIENT_ID}`,
+        );
         break;
+
       default:
         console.log(`⚠️ Failed to invalidate token: ${response.status} ${response.statusText}`);
         console.log(
