@@ -2,6 +2,7 @@ import { getUserPRActivityListInPeriod } from '@octoreport/core';
 import chalk from 'chalk';
 import { Command } from 'commander';
 
+import { RepoScope } from '../features/auth';
 import { printBox, TableConfig, renderTable } from '../features/ui';
 
 import { withCommandContext } from './withCommandContext';
@@ -24,20 +25,44 @@ const COMMON_TABLE_CONFIG: TableConfig[] = [
   { width: 30, title: 'Title', key: 'title' },
   { width: 15, title: 'Author', key: 'author' },
   { width: 10, title: 'Target Branch', key: 'targetBranch' },
-  { width: 50, title: 'Url', key: 'url' },
+  { width: 60, title: 'Url', key: 'url' },
   { width: 10, title: 'State', key: 'state' },
 ];
+
+function getAuthenticationModeDescription(mode: 'pat' | 'normal'): string {
+  switch (mode) {
+    case 'pat':
+      return '   • Personal Access Token mode\n   • You will need to enter your PAT each time\n   • No tokens are stored on your system';
+    case 'normal':
+      return `   • OAuth flow mode\n   • Token is securely stored in your OS keychain\n   • You can invalidate token by executing 'octoreport logout'\n`;
+  }
+}
+
+function getRepositoryScopeDescription(repoScope: RepoScope): string {
+  switch (repoScope) {
+    case 'public':
+      return '   • Access to public repositories only\n   • Private repositories will be excluded';
+    case 'private':
+      return '   • Access to both public and private repositories\n   • Full repository access granted';
+  }
+}
 
 async function handleAllCommand(
   format: Format,
   options: {
     mode: 'pat' | 'normal';
-    repoScope: 'public' | 'private';
+    repoScope: RepoScope;
   },
 ) {
   const { mode, repoScope } = options;
+
+  printBox(
+    '🔐 Authentication & Access Settings',
+    `${chalk.blue.bold('🔑 Authentication Mode:')} ${chalk.bold(mode.toUpperCase())}\n${getAuthenticationModeDescription(mode)}\n${chalk.blue.bold('🔒 Repository Scope:')} ${chalk.bold(repoScope.toUpperCase())}\n${getRepositoryScopeDescription(repoScope)}`,
+  );
   await withCommandContext(
-    async (answers, githubToken, username, spinner) => {
+    async (context, spinner) => {
+      const { answers, githubToken, username } = context;
       const { username: answeredUsername, repository, startDate, endDate, targetBranch } = answers;
       const result = await getUserPRActivityListInPeriod({
         githubToken,
@@ -54,19 +79,15 @@ async function handleAllCommand(
 
       printBox(
         '🐙🔍 Search Criteria',
-        `👤 Username: ${answeredUsername || username}` +
-          '\n' +
-          `🗄️ Repository: ${repository}` +
-          '\n' +
-          `📅 Period: ${startDate} ~ ${endDate}` +
-          '\n' +
-          `🎯 Target Branch: ${targetBranch || 'All branches'}` +
-          '\n' +
-          `✨ Format: ${getFormat(format)}` +
-          '\n' +
-          `🕹️ Mode: ${mode.toUpperCase()}` +
-          '\n' +
-          `🔒 Repo Scope: ${repoScope.toUpperCase()}`,
+        formatSearchCriteriaDisplay({
+          username: answeredUsername || username,
+          repository,
+          period: `${startDate} ~ ${endDate}`,
+          branch: targetBranch || 'All branches',
+          format: getFormat(format),
+          mode: mode.toUpperCase(),
+          scope: repoScope.toUpperCase(),
+        }),
       );
       if (format === 'table') {
         const userCreatedPRTableConfig: TableConfig[] = [
@@ -137,3 +158,31 @@ export function registerAllCommand(program: Command) {
       handleAllCommand(format, { mode, repoScope });
     });
 }
+
+interface SearchCriteriaDisplay {
+  username: string;
+  repository: string;
+  period: string;
+  branch: string;
+  format: string;
+  mode: string;
+  scope: string;
+}
+
+const formatSearchCriteriaDisplay = ({
+  username,
+  repository,
+  period,
+  branch,
+  format,
+  mode,
+  scope,
+}: SearchCriteriaDisplay) => {
+  return `👤 Username: ${username}
+💾 Repository: ${repository}
+📅 Period: ${period}
+🎯 Target Branch: ${branch}
+✨ Format: ${format}
+🎨 Mode: ${mode}
+🔒 Repo Scope: ${scope}`;
+};
