@@ -1,7 +1,8 @@
+import { fetchGitHubUserInfo } from '@octoreport/core';
 import ora, { Ora } from 'ora';
 
-import { login, getGithubToken } from '../features/auth';
-import { promptPRFetchCriteria, promptPrivateRepositoryAccessConfirm } from '../features/prompts';
+import { login, getStoredUserCredentials, areUserCredentialsStored } from '../features/auth';
+import { promptPRFetchCriteria, promptSecureToken } from '../features/prompts';
 
 export async function withCommandContext<T>(
   command: (
@@ -10,19 +11,37 @@ export async function withCommandContext<T>(
     username: string,
     spinner: Ora,
   ) => Promise<T>,
-  isPrivateAccess: boolean = false,
+  options: {
+    mode: 'pat' | 'normal';
+    repoScope: 'public' | 'private';
+  },
 ) {
-  if (isPrivateAccess) {
-    const isPermitted = await promptPrivateRepositoryAccessConfirm();
-    if (!isPermitted) {
-      console.log('❌ Permission denied. Exiting...');
-      process.exit(0);
+  const { mode, repoScope } = options;
+  let githubToken: string;
+  let username: string;
+
+  if (mode === 'pat') {
+    githubToken = await promptSecureToken();
+    const { login: fetchedUsername } = await fetchGitHubUserInfo(githubToken);
+    username = fetchedUsername;
+  } else {
+    const areCredentialsStored = await areUserCredentialsStored();
+    if (areCredentialsStored) {
+      const { repoScope: storedRepoScope } = await getStoredUserCredentials();
+      if (repoScope !== storedRepoScope) {
+        await login(repoScope);
+      }
+      const { token, username: storedUsername } = await getStoredUserCredentials();
+      githubToken = token;
+      username = storedUsername;
+    } else {
+      await login(repoScope);
+      const { token, username: storedUsername } = await getStoredUserCredentials();
+      githubToken = token;
+      username = storedUsername;
     }
   }
-
-  const { email, username } = await login(isPrivateAccess);
-  const githubToken = await getGithubToken(email);
-  const answers = await promptPRFetchCriteria(isPrivateAccess);
+  const answers = await promptPRFetchCriteria(repoScope);
 
   const spinner = ora({
     text: '🐙🔎 Processing...',

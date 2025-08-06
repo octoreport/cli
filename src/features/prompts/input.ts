@@ -1,9 +1,12 @@
 import inquirer from 'inquirer';
 
-export async function promptPRFetchCriteria(isPrivateAccess: boolean = false) {
-  const repositoryMessage = isPrivateAccess
-    ? '🐙 Enter the repository (e.g., facebook/react) - Private repositories are now accessible:'
-    : '🐙 Enter the repository (e.g., facebook/react) - Only public repositories are accessible:';
+import { RepoScope } from '../auth';
+
+export async function promptPRFetchCriteria(repoScope: RepoScope) {
+  const repositoryMessage =
+    repoScope === 'private'
+      ? '🐙 Enter the repository (e.g., facebook/react) - Private repositories are now accessible:'
+      : '🐙 Enter the repository (e.g., facebook/react) - Only public repositories are accessible:';
 
   return await inquirer.prompt([
     {
