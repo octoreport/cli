@@ -1,47 +1,63 @@
-import { fetchGitHubUserInfo } from '@octoreport/core';
+import { GitHubUserInfo } from '@octoreport/core';
 import ora, { Ora } from 'ora';
 
-import { login, getStoredUserCredentials, areUserCredentialsStored } from '../features/auth';
+import {
+  getUserCredentialsByPAT,
+  getUserCredentialsForRepoScope,
+  RepoScope,
+} from '../features/auth';
 import { promptPRFetchCriteria, promptSecureToken } from '../features/prompts';
 
+function getRepoScopeByScopeList(scopeList: GitHubUserInfo['scopeList']): RepoScope {
+  if (scopeList.includes('repo')) {
+    return 'private';
+  } else {
+    return 'public';
+  }
+}
+
+interface CommandContext {
+  answers: Awaited<ReturnType<typeof promptPRFetchCriteria>>;
+  githubToken: string;
+  username: string;
+}
+
+async function getCommandContextForPAT(): Promise<CommandContext> {
+  const pat = await promptSecureToken();
+  const { token, username: fetchedUsername, scopeList } = await getUserCredentialsByPAT(pat);
+  const patRepoScope = getRepoScopeByScopeList(scopeList);
+  const answers = await promptPRFetchCriteria(patRepoScope);
+  return { answers, githubToken: token, username: fetchedUsername };
+}
+
+async function getCommandContextForRepoScope(repoScope: RepoScope): Promise<CommandContext> {
+  const { token, username: fetchedUsername } = await getUserCredentialsForRepoScope(repoScope);
+  const answers = await promptPRFetchCriteria(repoScope);
+  return { answers, githubToken: token, username: fetchedUsername };
+}
+
+async function getCommandContextByMode(
+  mode: 'pat' | 'normal',
+  repoScope: RepoScope,
+): Promise<CommandContext> {
+  let context: CommandContext;
+  if (mode === 'pat') {
+    context = await getCommandContextForPAT();
+  } else {
+    context = await getCommandContextForRepoScope(repoScope);
+  }
+  return context;
+}
+
 export async function withCommandContext<T>(
-  command: (
-    answers: Awaited<ReturnType<typeof promptPRFetchCriteria>>,
-    githubToken: string,
-    username: string,
-    spinner: Ora,
-  ) => Promise<T>,
+  command: (context: CommandContext, spinner: Ora) => Promise<T>,
   options: {
     mode: 'pat' | 'normal';
-    repoScope: 'public' | 'private';
+    repoScope: RepoScope;
   },
 ) {
   const { mode, repoScope } = options;
-  let githubToken: string;
-  let username: string;
-
-  if (mode === 'pat') {
-    githubToken = await promptSecureToken();
-    const { login: fetchedUsername } = await fetchGitHubUserInfo(githubToken);
-    username = fetchedUsername;
-  } else {
-    const areCredentialsStored = await areUserCredentialsStored();
-    if (areCredentialsStored) {
-      const { repoScope: storedRepoScope } = await getStoredUserCredentials();
-      if (repoScope !== storedRepoScope) {
-        await login(repoScope);
-      }
-      const { token, username: storedUsername } = await getStoredUserCredentials();
-      githubToken = token;
-      username = storedUsername;
-    } else {
-      await login(repoScope);
-      const { token, username: storedUsername } = await getStoredUserCredentials();
-      githubToken = token;
-      username = storedUsername;
-    }
-  }
-  const answers = await promptPRFetchCriteria(repoScope);
+  const context = await getCommandContextByMode(mode, repoScope);
 
   const spinner = ora({
     text: '🐙🔎 Processing...',
@@ -50,7 +66,7 @@ export async function withCommandContext<T>(
   }).start();
 
   try {
-    await command(answers, githubToken, username, spinner);
+    await command(context, spinner);
   } catch (error) {
     if (!spinner.isSpinning && spinner.text.includes('❌')) {
       return;
