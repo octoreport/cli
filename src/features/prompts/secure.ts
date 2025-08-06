@@ -27,7 +27,7 @@ export async function promptSecureInput(
 export async function promptSecureToken(
   prompt: string = '🔐 Enter your GitHub Personal Access Token (min 10 characters): ',
 ): Promise<string> {
-  const { secureInput } = await promptSecureInput(
+  const secureInput = await promptSecureInput(
     prompt,
     (input: string): { isValid: boolean; message?: string } => {
       if (input.trim().length < 10) {
@@ -37,5 +37,5 @@ export async function promptSecureToken(
     },
   );
 
-  return secureInput.trim();
+  return secureInput;
 }
