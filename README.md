@@ -357,17 +357,31 @@ npm test -- tests/index.test.ts
 
 We welcome contributions! 👍🏻
 
-1. Fork this repository
-2. Create a feature branch (`git checkout -b feature/your-feature`)
-3. Commit your changes (`git commit -m "feat: your feature"`)
-4. Push to your fork and open a Pull Request
+Please read our [Contributing Guidelines](CONTRIBUTING.md) before submitting any changes. The guidelines include:
 
-### Development Guidelines
+- **Security Setup**: Required git-secrets configuration to prevent token leaks
+- **Development Workflow**: Branching, testing, and PR process
+- **Code Style**: TypeScript guidelines and quality standards
 
-- Follow TypeScript best practices
-- Write comprehensive tests for new features
-- Use conventional commit messages
-- Ensure all tests pass before submitting PRs
+### Quick Start for Contributors
+
+```bash
+# Clone the repository
+git clone https://github.com/octoreport/cli.git
+cd cli
+
+# Install dependencies
+npm install
+
+# Set up git-secrets (REQUIRED)
+git secrets --install
+git secrets --add '^gh[pousr]_[A-Za-z0-9_]{36}$'
+git secrets --add '^github_pat_[A-Za-z0-9]{22}_[A-Za-z0-9]{59}$'
+git secrets --add 'ghp_[A-Za-z0-9]{36}'
+
+```
+
+**⚠️ Important**: This project handles GitHub API tokens, so git-secrets setup is mandatory. See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed setup instructions.
 
 ## License
 
