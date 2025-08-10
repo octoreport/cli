@@ -4,7 +4,7 @@
 	<img width="500px" src="media/logo.png" alt="octoreport">
 </h1>
 
-> A modern, secure, and timezone-aware GitHub PR/issue analytics CLI tool.It provides a clean, interactive command-line interface for retrieving, filtering, and analyzing pull request activity with flexible filtering and accurate participation tracking.
+> A modern, secure, and timezone-aware GitHub PR/issue analytics CLI tool. It provides a clean, interactive command-line interface for retrieving, filtering, and analyzing pull request activity with flexible filtering and accurate participation tracking.
 
 ## Features
 
@@ -41,6 +41,7 @@ npm install -g @octoreport/cli
 - Node.js >= 18
 - npm or yarn
 - GitHub account
+- detect-secrets installed (required for contributors)
 
 ## Quick Start
 
@@ -86,7 +87,7 @@ The OAuth app requests different scopes based on your needs:
 - `repo` - Full repository access (public and private)
 - `read:user` - Read user profile information
 
-**Security Note:** Both scopes grant read/write access to repositories, not just read-only access.
+**⚠ Security Note:** Both scopes grant read/write access to repositories, not just read-only access.
 
 ## Commands
 
@@ -359,7 +360,7 @@ We welcome contributions! 👍🏻
 
 Please read our [Contributing Guidelines](CONTRIBUTING.md) before submitting any changes. The guidelines include:
 
-- **Security Setup**: Required git-secrets configuration to prevent token leaks
+- **Security Setup**: Required detect-secrets configuration to prevent token leaks
 - **Development Workflow**: Branching, testing, and PR process
 - **Code Style**: TypeScript guidelines and quality standards
 
@@ -373,15 +374,24 @@ cd cli
 # Install dependencies
 npm install
 
-# Set up git-secrets (REQUIRED)
-git secrets --install
-git secrets --add '^gh[pousr]_[A-Za-z0-9_]{36}$'
-git secrets --add '^github_pat_[A-Za-z0-9]{22}_[A-Za-z0-9]{59}$'
-git secrets --add 'ghp_[A-Za-z0-9]{36}'
+# Install detect-secrets (via pipx recommended)
+brew install pipx
+pipx install detect-secrets
 
+# Ensure baseline file exists
+ls .secrets.baseline
+
+# Run an initial scan (if baseline needs update)
+detect-secrets scan \
+  --exclude-files 'node_modules/.*' \
+  --exclude-files '.*package-lock\.json' \
+  --exclude-files '.*yarn\.lock' \
+  > .secrets.baseline
+git add .secrets.baseline
+git commit -m "chore(security): update detect-secrets baseline"
 ```
 
-**⚠️ Important**: This project handles GitHub API tokens, so git-secrets setup is mandatory. See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed setup instructions.
+**⚠️ Important**: This project handles GitHub API tokens, so detect-secrets setup is mandatory. The pre-commit hook will block commits containing new secrets. The CI pipeline will re-scan on every PR and push to main.
 
 ## License
 
