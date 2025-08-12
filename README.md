@@ -81,13 +81,11 @@ The OAuth app requests different scopes based on your needs:
 
 - `public_repo` - Full access to public repositories (read/write)
 - `read:user` - Read user profile information
-- `user:email` - Read user email information
 
 **With `--private` flag:**
 
 - `repo` - Full repository access (public and private)
 - `read:user` - Read user profile information
-- `user:email` - Read user email information
 
 **⚠ Security Note:** Both scopes grant read/write access to repositories, not just read-only access.
 

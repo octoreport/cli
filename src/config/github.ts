@@ -7,5 +7,5 @@ export const GITHUB_CONFIG = {
 export const GITHUB_SCOPES = {
   PUBLIC_REPO: ['public_repo'],
   PRIVATE_REPO: ['repo'],
-  USER_INFO: ['read:user', 'user:email'],
+  USER_INFO: ['read:user'],
 } as const;
