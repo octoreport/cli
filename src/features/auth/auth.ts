@@ -12,19 +12,19 @@ export type RepoScope = 'public' | 'private';
 export async function login(repoScope: RepoScope): Promise<void> {
   logLoginGuide(repoScope);
   const newToken = await issueGitHubTokenForRepoScope(repoScope);
-  const { login: username, email } = await fetchGitHubUserInfo(newToken);
-  await storeUserCredentials(newToken, repoScope, { email, username });
+  const { login: username, id } = await fetchGitHubUserInfo(newToken);
+  await storeUserCredentials(newToken, repoScope, { id, username });
 }
 
 export async function logout() {
   try {
-    const { email } = getUserInfo();
-    if (email) {
-      const credentials = await getCredentials(email);
+    const { id } = getUserInfo();
+    if (id) {
+      const credentials = await getCredentials(id);
       const { token } = JSON.parse(credentials);
       if (token) {
         await invalidateGitHubToken(token);
-        await deleteCredentials(email);
+        await deleteCredentials(id);
         clearUserInfo();
         console.log('✅ Logout completed successfully!');
       } else {

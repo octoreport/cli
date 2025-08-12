@@ -30,35 +30,35 @@ export async function getUserCredentialsForRepoScope(
 }
 
 export async function getStoredUserCredentials(): Promise<{
-  email: string;
+  id: string;
   token: string;
   username: string;
   repoScope: RepoScope;
 }> {
-  const { email, username } = getUserInfo();
-  if (!email || !username) throw new Error('User info not found. Please log in first.');
-  const credentials = await getCredentials(email);
+  const { id, username } = getUserInfo();
+  if (!id || !username) throw new Error('User info not found. Please log in first.');
+  const credentials = await getCredentials(id);
   if (!credentials) throw new Error('Credentials not found. Please log in first.');
   const { token, repoScope } = JSON.parse(credentials);
   if (!token || !repoScope) throw new Error('Credentials not found. Please log in first.');
-  return { email, username, token, repoScope };
+  return { id, username, token, repoScope };
 }
 
 export async function storeUserCredentials(
   token: string,
   repoScope: RepoScope,
-  userInfo: { email: string; username: string },
+  userInfo: { id: string; username: string },
 ): Promise<void> {
   setUserInfo(userInfo);
-  await setCredentials(userInfo.email, JSON.stringify({ token, repoScope }));
+  await setCredentials(userInfo.id, JSON.stringify({ token, repoScope }));
 }
 
 export async function areUserCredentialsStored(): Promise<boolean> {
   try {
-    const { email } = getUserInfo();
-    if (!email) return false;
+    const { id } = getUserInfo();
+    if (!id) return false;
 
-    const credentials = await getCredentials(email);
+    const credentials = await getCredentials(id);
     if (!credentials) return false;
 
     const parsedCredentials = JSON.parse(credentials);
