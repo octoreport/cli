@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import { Command } from 'commander';
 
-import { clearUserInfo, login, logout, RepoScope } from '../features/auth';
+import { login, logout, RepoScope } from '../features/auth';
 
 export function registerLoginCommand(program: Command) {
   program
@@ -12,7 +12,6 @@ export function registerLoginCommand(program: Command) {
       console.log(chalk.blue('🔐 Logging in to GitHub...'));
       try {
         await login(repoScope);
-        clearUserInfo();
         console.log(chalk.green('✅ Successfully logged in!'));
         if (repoScope === 'private') {
           console.log(
@@ -45,7 +44,6 @@ export function registerLogoutCommand(program: Command) {
 
       try {
         await logout();
-        clearUserInfo();
         console.log(chalk.green('✅ Successfully logged out!'));
         console.log(chalk.yellow('ℹ️ You will need to log in again to use @octoreport/cli.'));
       } catch (error) {
