@@ -1,9 +1,9 @@
 import { fetchGitHubUserInfo, GitHubUserInfo } from '@octoreport/core';
 
-import { getCredentials, setCredentials } from '../storage';
+import { deleteAllCredentials, getCredentials, setCredentials } from '../storage';
 
 import { login, RepoScope } from './auth';
-import { getUserInfo, setUserInfo } from './userInfo';
+import { deleteUserInfoFile, loadUserInfoFromFile, saveUserInfoToFile } from './userInfo';
 
 export async function getUserCredentialsByPAT(
   pat: string,
@@ -35,7 +35,7 @@ export async function getStoredUserCredentials(): Promise<{
   username: string;
   repoScope: RepoScope;
 }> {
-  const { id, username } = getUserInfo();
+  const { id, username } = loadUserInfoFromFile();
   if (!id || !username) throw new Error('User info not found. Please log in first.');
   const credentials = await getCredentials(id);
   if (!credentials) throw new Error('Credentials not found. Please log in first.');
@@ -49,13 +49,18 @@ export async function storeUserCredentials(
   repoScope: RepoScope,
   userInfo: { id: string; username: string },
 ): Promise<void> {
-  setUserInfo(userInfo);
+  saveUserInfoToFile(userInfo);
   await setCredentials(userInfo.id, JSON.stringify({ token, repoScope }));
+}
+
+export async function deleteUserCredentials(): Promise<void> {
+  deleteUserInfoFile();
+  await deleteAllCredentials();
 }
 
 export async function areUserCredentialsStored(): Promise<boolean> {
   try {
-    const { id } = getUserInfo();
+    const { id } = loadUserInfoFromFile();
     if (!id) return false;
 
     const credentials = await getCredentials(id);
