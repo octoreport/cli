@@ -1,6 +1,6 @@
-import { Entry } from '@napi-rs/keyring';
+import { Entry, findCredentials } from '@napi-rs/keyring';
 
-const SERVICE_NAME = '@octoreport/cli';
+import { SERVICE_NAME } from '../../config/github';
 
 async function loadKeytar() {
   try {
@@ -47,6 +47,19 @@ export async function getCredentials(key: string): Promise<string> {
   return credentials;
 }
 
+export async function getAllCredentials(): Promise<
+  {
+    key: string;
+    value: string;
+  }[]
+> {
+  const allCredentials = findCredentials(SERVICE_NAME);
+  return allCredentials.map((credentials) => ({
+    key: credentials.account,
+    value: credentials.password,
+  }));
+}
+
 export async function setCredentials(key: string, credentials: string) {
   if (!key) throw new Error('Key is not found. Please check your auth status.');
 
@@ -77,4 +90,14 @@ export async function deleteCredentials(key: string) {
   } catch {
     // keytar deletion failed silently (already migrated to keyring)
   }
+}
+
+export async function deleteAllCredentials() {
+  const allCredentials = findCredentials(SERVICE_NAME);
+
+  await Promise.all(
+    allCredentials.map(async (credentials) => {
+      await deleteCredentials(credentials.account);
+    }),
+  );
 }
