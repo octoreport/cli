@@ -1,7 +1,8 @@
 import chalk from 'chalk';
 import { Command } from 'commander';
 
-import { login, logout, RepoScope } from '../features/auth';
+import { login, logout } from '../features/auth';
+import type { RepoScope } from '../features/auth/types';
 
 export function registerLoginCommand(program: Command) {
   program

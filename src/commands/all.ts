@@ -2,7 +2,7 @@ import { getUserPRActivityListInPeriod } from '@octoreport/core';
 import chalk from 'chalk';
 import { Command } from 'commander';
 
-import { RepoScope } from '../features/auth';
+import type { RepoScope } from '../features/auth/types';
 import { printBox, TableConfig, renderTable } from '../features/ui';
 
 import { withCommandContext } from './withCommandContext';

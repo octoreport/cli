@@ -1,11 +1,8 @@
 import { GitHubUserInfo } from '@octoreport/core';
 import ora, { Ora } from 'ora';
 
-import {
-  getUserCredentialsByPAT,
-  getUserCredentialsForRepoScope,
-  RepoScope,
-} from '../features/auth';
+import { getUserCredentialsByPAT, getUserCredentialsForRepoScope } from '../features/auth';
+import type { RepoScope } from '../features/auth/types';
 import { promptPRFetchCriteria, promptSecureToken } from '../features/prompts';
 
 function getRepoScopeByScopeList(scopeList: GitHubUserInfo['scopeList']): RepoScope {
@@ -57,15 +54,16 @@ export async function withCommandContext<T>(
   },
 ) {
   const { mode, repoScope } = options;
-  const context = await getCommandContextByMode(mode, repoScope);
 
   const spinner = ora({
     text: '🐙🔎 Processing...',
     spinner: 'dots2',
     color: 'green',
-  }).start();
+  });
 
   try {
+    const context = await getCommandContextByMode(mode, repoScope);
+    spinner.start();
     await command(context, spinner);
   } catch (error) {
     if (!spinner.isSpinning && spinner.text.includes('❌')) {

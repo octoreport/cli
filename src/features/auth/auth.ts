@@ -5,9 +5,8 @@ import { logLoginGuide } from '../ui';
 
 import { deleteUserCredentials, storeUserCredentials } from './credentials';
 import { issueGitHubTokenForRepoScope, invalidateAllGitHubTokens } from './token';
+import type { RepoScope } from './types';
 import { loadUserInfoFromFile } from './userInfo';
-
-export type RepoScope = 'public' | 'private';
 
 export async function login(repoScope: RepoScope): Promise<void> {
   logLoginGuide(repoScope);

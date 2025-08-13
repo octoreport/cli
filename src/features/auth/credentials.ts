@@ -2,7 +2,7 @@ import { fetchGitHubUserInfo, GitHubUserInfo } from '@octoreport/core';
 
 import { deleteAllCredentials, getCredentials, setCredentials } from '../storage';
 
-import { login, RepoScope } from './auth';
+import type { RepoScope, StoredCredentials, UserInfo } from './types';
 import { deleteUserInfoFile, loadUserInfoFromFile, saveUserInfoToFile } from './userInfo';
 
 export async function getUserCredentialsByPAT(
@@ -18,23 +18,16 @@ export async function getUserCredentialsForRepoScope(
   try {
     const { repoScope: storedRepoScope } = await getStoredUserCredentials();
     if (repoScope !== storedRepoScope) {
-      await login(repoScope);
+      throw new Error('Repository scope mismatch. Please log in again.');
     }
     const { token, username } = await getStoredUserCredentials();
     return { token, username };
   } catch {
-    await login(repoScope);
-    const { token, username } = await getStoredUserCredentials();
-    return { token, username };
+    throw new Error('Repository scope mismatch. Please log in again.');
   }
 }
 
-export async function getStoredUserCredentials(): Promise<{
-  id: string;
-  token: string;
-  username: string;
-  repoScope: RepoScope;
-}> {
+export async function getStoredUserCredentials(): Promise<StoredCredentials> {
   const { id, username } = loadUserInfoFromFile();
   if (!id || !username) throw new Error('User info not found. Please log in first.');
   const credentials = await getCredentials(id);
@@ -47,7 +40,7 @@ export async function getStoredUserCredentials(): Promise<{
 export async function storeUserCredentials(
   token: string,
   repoScope: RepoScope,
-  userInfo: { id: string; username: string },
+  userInfo: UserInfo,
 ): Promise<void> {
   saveUserInfoToFile(userInfo);
   await setCredentials(userInfo.id, JSON.stringify({ token, repoScope }));

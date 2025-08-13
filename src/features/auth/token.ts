@@ -3,7 +3,7 @@ import { createOAuthDeviceAuth } from '@octokit/auth-oauth-device';
 import { GITHUB_CONFIG, GITHUB_SCOPES } from '../../config/github';
 import { getAllCredentials } from '../storage';
 
-import { RepoScope } from './auth';
+import type { RepoScope } from './types';
 
 async function authorizeWithGitHubDeviceFlow(
   clientId: string,
