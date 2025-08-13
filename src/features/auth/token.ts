@@ -1,6 +1,7 @@
 import { createOAuthDeviceAuth } from '@octokit/auth-oauth-device';
 
 import { GITHUB_CONFIG, GITHUB_SCOPES } from '../../config/github';
+import { getAllCredentials } from '../storage';
 
 import { RepoScope } from './auth';
 
@@ -83,5 +84,29 @@ export async function invalidateGitHubToken(accessToken: string): Promise<void> 
     console.log(
       `ℹ️ Please manually revoke at: https://github.com/settings/connections/applications/${GITHUB_CONFIG.CLIENT_ID}`,
     );
+  }
+}
+
+export async function invalidateAllGitHubTokens(): Promise<void> {
+  try {
+    const allCredentials = await getAllCredentials();
+
+    await Promise.all(
+      allCredentials.map(async (credential) => {
+        const { key, value } = credential;
+        try {
+          if (value) {
+            await invalidateGitHubToken(value);
+          }
+        } catch (error) {
+          console.warn(`Failed to revoke token for account ${key}:`, error);
+        }
+      }),
+    );
+
+    console.log(`✅ Successfully revoked ${allCredentials.length} GitHub tokens`);
+  } catch (error) {
+    console.error('Failed to revoke GitHub tokens:', error);
+    throw error;
   }
 }
