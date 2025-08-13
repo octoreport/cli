@@ -9,3 +9,5 @@ export const GITHUB_SCOPES = {
   PRIVATE_REPO: ['repo'],
   USER_INFO: ['read:user'],
 } as const;
+
+export const SERVICE_NAME = '@octoreport/cli';

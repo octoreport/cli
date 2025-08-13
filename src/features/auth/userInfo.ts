@@ -5,18 +5,18 @@ import path from 'path';
 const configDir = path.join(os.homedir(), '.octoreport', 'cli');
 const tokenPath = path.join(configDir, 'user_info.json');
 
-export function setUserInfo(user: { username: string; id: string }) {
+export function saveUserInfoToFile(user: { username: string; id: string }) {
   fs.mkdirSync(configDir, { recursive: true });
   fs.writeFileSync(tokenPath, JSON.stringify({ user }), 'utf-8');
 }
 
-export function getUserInfo(): { username: string; id: string } {
+export function loadUserInfoFromFile(): { username: string; id: string } {
   if (!fs.existsSync(tokenPath)) return { username: '', id: '' };
   const { user } = JSON.parse(fs.readFileSync(tokenPath, 'utf-8'));
   return { username: user.username, id: user.id };
 }
 
-export function clearUserInfo(): void {
+export function deleteUserInfoFile(): void {
   try {
     if (fs.existsSync(tokenPath)) {
       fs.unlinkSync(tokenPath);
