@@ -4,7 +4,7 @@ import { getCredentials } from '../storage';
 import { logLoginGuide } from '../ui';
 
 import { deleteUserCredentials, storeUserCredentials } from './credentials';
-import { issueGitHubTokenForRepoScope, invalidateAllGitHubTokens } from './token';
+import { issueGitHubTokenForRepoScope } from './token';
 import type { RepoScope } from './types';
 import { loadUserInfoFromFile } from './userInfo';
 
@@ -41,7 +41,6 @@ export async function logout(): Promise<void> {
 
 export async function revokeUserAccess(): Promise<void> {
   try {
-    await invalidateAllGitHubTokens();
     await deleteUserCredentials();
   } catch (error) {
     console.log(
