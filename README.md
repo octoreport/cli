@@ -26,9 +26,11 @@
 
 📋 **Multiple Output Formats**: Supports table, JSON, and plain text formats
 
-🔓 **Private Repository Support**: Optional access to private repositories with `--private` flag
+🔓 **Private Repository Support**: Optional access to private repositories with `--repo-scope private` option
 
 📖 **Read-Only Operations**: Only reads repository data, never modifies or creates content
+
+🔄 **Scope Consistency**: Login and command execution must use matching repository scopes
 
 ## Installation
 
@@ -46,25 +48,34 @@ npm install -g @octoreport/cli
 ## Quick Start
 
 ```bash
-# Login to GitHub (first time only)
+# Login to GitHub for public repositories (first time only)
 octoreport login
 
-# Get comprehensive PR activity report (public repositories only)
+# Or login with private repository access
+octoreport login --repo-scope private
+
+# Get comprehensive PR activity report (public repositories)
 octoreport all
 
 # Get report in JSON format
 octoreport all --format json
 
-# Access private repositories
-octoreport all --private
+# Access private repositories (must login with --repo-scope private first)
+octoreport all --repo-scope private
 ```
+
+⚠️ **Important**: The `--repo-scope` option used in commands must match the scope used during login. If you get a "Repository scope mismatch" error, log out and log in again with the desired scope.
 
 ## Authentication
 
 The CLI uses GitHub's OAuth device flow for secure authentication:
 
 ```bash
+# Login for public repositories (default)
 octoreport login
+
+# Login for private repositories
+octoreport login --repo-scope private
 ```
 
 This will:
@@ -73,16 +84,41 @@ This will:
 2. Securely store your token in the system keychain
 3. Automatically handle token refresh and management
 
+### Repository Scope Management
+
+**⚠️ Critical**: The repository scope used during login determines which repositories you can access. You must use the **same scope** when running commands.
+
+```bash
+# Example: Login with private scope
+octoreport login --repo-scope private
+
+# Then use the same scope in commands
+octoreport all --repo-scope private
+
+# If scopes don't match, you'll get an error:
+# "Repository scope mismatch. Please log in again."
+```
+
+**To switch scopes:**
+
+```bash
+# 1. Logout
+octoreport logout
+
+# 2. Login with desired scope
+octoreport login --repo-scope public  # or private
+```
+
 ### Required Scopes
 
 The OAuth app requests different scopes based on your needs:
 
-**Default (Public repositories only):**
+**Default (`--repo-scope public`):**
 
 - `public_repo` - Full access to public repositories (read/write)
 - `read:user` - Read user profile information
 
-**With `--private` flag:**
+**With `--repo-scope private`:**
 
 - `repo` - Full repository access (public and private)
 - `read:user` - Read user profile information
@@ -106,17 +142,20 @@ octoreport a
 octoreport all --format json
 octoreport all --format table
 
-# Access private repositories
-octoreport all --private
+# Access private repositories (requires login with --repo-scope private)
+octoreport all --repo-scope private
 
 # Combine options
-octoreport all --private --format json
+octoreport all --repo-scope private --format json
 ```
 
 **Options:**
 
 - `--format <format>` - Output format (table, json, general) [default: table]
-- `--private` - Enable access to private repositories
+- `--repo-scope <scope>` - Repository access scope (public, private) [default: public]
+  - Must match the scope used during login
+  - Use `public` for public repositories only
+  - Use `private` for both public and private repositories
 
 **Interactive Prompts:**
 
@@ -277,11 +316,18 @@ The CLI implements a security-first approach to repository access:
 
 **Private Repository Access:**
 
-- Use `--private` flag to enable private repository access
+- Use `--repo-scope private` to enable private repository access
 - Requests `repo` scope which provides full repository access
 - Includes access to organization resources and team memberships
 - Requires re-authentication when switching between public/private access
 - Clearly indicates access level in the output
+
+**Scope Consistency Requirement:**
+
+- ⚠️ The `--repo-scope` used in commands **must match** the scope used during login
+- Different scopes are stored separately in the system keychain
+- Switching scopes requires logout and re-login
+- Attempting to use mismatched scopes will result in: `Repository scope mismatch. Please log in again.`
 
 **Security Notice:** Both scopes grant read/write access, not just read-only access.
 
