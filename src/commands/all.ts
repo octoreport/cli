@@ -128,8 +128,8 @@ export function registerAllCommand(program: Command) {
     .description(
       'Generate comprehensive PR activity reports for GitHub repositories 🐙📊\n\n' +
         'This command analyzes your Pull Request activities including:\n' +
-        'ℹ️ PRs you created\n' +
-        'ℹ️ PRs you participated in (reviews, comments)\n\n' +
+        '• PRs you created\n' +
+        '• PRs you participated in (reviews, comments)\n\n' +
         'Output Format:\n' +
         '• --format table: Default format. Display results in a table\n' +
         '• --format json: Display results in JSON format\n' +
